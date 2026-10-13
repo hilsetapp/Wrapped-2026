@@ -34,6 +34,11 @@
     const btn = landing.querySelector(".btn-primary");
     btn.disabled = true;
     showLoading();
+    /* overall watchdog: an app must never become a silent spinner */
+    const watchdog = setTimeout(() => {
+      hideLoading();
+      showError("Still nothing after 45 seconds 😔 — something is blocking requests to GitHub. Try disabling your ad-blocker / VPN / browser turbo-mode for this page and press the button again.");
+    }, 45000);
     try {
       raw = await GH.fetchWrapped(username, loadStep);
       stats = Stats.compute(raw);
@@ -43,8 +48,11 @@
       hideLoading();
       if (e.code === 404) showError("Couldn't find @" + username + " on GitHub — check the spelling 👀");
       else if (e.code === 403) showError("GitHub's free API limit is hit (60 requests/hour per visitor). Take a coffee and try again ☕");
+      else if (e.code === "timeout") showError("GitHub API is not answering (timeout). Might be a slow connection or a VPN — try again 🔁");
+      else if (e.code === "network") showError("Requests to GitHub are blocked: disable ad-blocker / VPN / turbo-mode / antivirus web filter for this page and retry 🔁");
       else showError("Something went wrong while talking to GitHub. Check your connection and retry 🔁");
     } finally {
+      clearTimeout(watchdog);
       btn.disabled = false;
     }
   }

@@ -11,8 +11,25 @@ const GH = (() => {
   const CACHE_TTL = 15 * 60 * 1000; // 15 min
 
   /* ---------- tiny fetch helper with typed errors ---------- */
+  const TIMEOUT_MS = 15000;
+
   async function getJSON(url) {
-    const res = await fetch(url);
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+    let res;
+    try {
+      res = await fetch(url, { signal: ctl.signal });
+    } catch (e) {
+      const err = new Error(
+        e.name === "AbortError"
+          ? "timeout — GitHub API did not answer in time"
+          : "network — a browser extension, VPN, turbo-mode or antivirus web filter is likely blocking requests to GitHub"
+      );
+      err.code = e.name === "AbortError" ? "timeout" : "network";
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
     if (res.status === 404) {
       const e = new Error("not-found");
       e.code = 404;

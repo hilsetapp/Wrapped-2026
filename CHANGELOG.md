@@ -16,3 +16,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Share buttons for X / Telegram / copy-link; deep links via `?u=username`
 - 15-minute `localStorage` cache to be gentle with GitHub's rate limits
 - Graceful fallbacks for rate limits and unavailable data sources
+
+## [0.1.1] — 2026-10-13
+
+### Fixed
+- 🔧 **Never a silent spinner again**: every API request now has a 15s timeout
+  (AbortController) and a 45s overall watchdog — blocked or dead networks surface a
+  clear, actionable message instead of an endless loader.
+- Error states now distinguish: user not found / rate limit / timeout / blocked-by-extension.

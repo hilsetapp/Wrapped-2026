@@ -69,3 +69,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Completed the v0.2.1 language patch: EN is now genuinely the default
   (the previous commit raced and kept the RU auto-detection), and the RU
   "attach your poster" hint string is back.
+
+## [0.2.3] — 2026-10-13
+
+### Fixed
+- 📱 **Poster preview squash**: the finale `<canvas>` shrank vertically when the
+  slide content exceeded the frame height (flexbox default) — pinned with
+  `flex-shrink: 0` + `aspect-ratio: 1/1`.
+
+### Changed
+- 🖼 OG/README banner is now **drawn programmatically** (`assets/og-banner.py`,
+  PIL) in the zine identity — guaranteed margins, crisp vectors, nothing clipped
+  at the edges (the AI-generated one glued text to the left border).

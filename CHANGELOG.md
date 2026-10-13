@@ -62,3 +62,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - 📤 **Smarter sharing**: X/Telegram buttons now pre-download the poster and show
   an "attach it" hint on desktop; on mobile they open the native share sheet with
   the PNG already attached (Web Share API).
+
+## [0.2.2] — 2026-10-13
+
+### Fixed
+- Completed the v0.2.1 language patch: EN is now genuinely the default
+  (the previous commit raced and kept the RU auto-detection), and the RU
+  "attach your poster" hint string is back.

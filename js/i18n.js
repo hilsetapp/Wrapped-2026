@@ -4,8 +4,9 @@
    ═══════════════════════════════════════════════════════════════ */
 
 const I18N = (() => {
+  /* EN is the international default; a saved choice always wins */
   let lang = localStorage.getItem("wrapped2026-lang");
-  if (!lang) lang = /^ru\b/i.test(navigator.language || "") ? "ru" : "en";
+  if (!lang) lang = "en";
 
   const setLang = (l) => { lang = l; try { localStorage.setItem("wrapped2026-lang", l); } catch (_) {} };
   const getLang = () => lang;
@@ -138,6 +139,7 @@ const I18N = (() => {
       btnDownload: "⬇ Скачать постер",
       btnAgain: "↻ сделать своё",
       shared: "✓ скопировано",
+      hintAttach: "постер скачан — прикрепи его к посту ✨",
 
       rEarly: "жаворонок", rDay: "дневной кодер", rEvening: "вечерний хакер", rNight: "сова",
 

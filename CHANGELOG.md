@@ -24,3 +24,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   (AbortController) and a 45s overall watchdog — blocked or dead networks surface a
   clear, actionable message instead of an endless loader.
 - Error states now distinguish: user not found / rate limit / timeout / blocked-by-extension.
+
+## [0.1.2] — 2026-10-13
+
+### Fixed
+- 🥞 **THE z-layer bug**: author's `display: flex` on `#loading` and `#story`
+  overrode the `hidden` attribute (classic CSS priority gotcha), so the loading
+  overlay was rendered on top of the landing from page load and swallowed all clicks —
+  the app looked permanently stuck. Added the canonical `[hidden] { display: none !important; }` guard.

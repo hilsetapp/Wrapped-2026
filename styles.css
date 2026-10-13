@@ -14,6 +14,10 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+/* author `display` rules would otherwise beat the `hidden` attribute —
+   this guard makes [hidden] always win (classic gotcha with flex overlays) */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   min-height: 100vh;

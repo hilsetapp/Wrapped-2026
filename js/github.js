@@ -88,8 +88,9 @@ const GH = (() => {
     );
 
     onStep("painting your contribution grid…", 0.55);
+    /* this API generates the grid lazily on first request → give it extra time */
     const contrib = await optional(
-      getJSON(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(user)}?y=${YEAR}`)
+      getJSON(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(user)}?y=${YEAR}`, 30000)
     );
 
     onStep("counting pull requests…", 0.72);

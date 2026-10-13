@@ -21,7 +21,25 @@
   /* ══════════ loading ══════════ */
   const showLoading = () => { loading.hidden = false; fillEl.style.width = "4%"; };
   const hideLoading = () => { loading.hidden = true; };
-  const loadStep = (label, frac) => { stepEl.textContent = label; fillEl.style.width = Math.round(frac * 100) + "%"; };
+
+  /* overall watchdog, re-armed on every progress step — the app must
+     never become a silent spinner */
+  let watchdogT = null;
+  function armWatchdog() {
+    clearTimeout(watchdogT);
+    watchdogT = setTimeout(() => {
+      hideLoading();
+      watchdogT = null;
+      showError("Still nothing after 45 seconds 😔 — something is blocking requests to GitHub. Try disabling your ad-blocker / VPN / browser turbo-mode for this page and press the button again.");
+    }, 45000);
+  }
+  function disarmWatchdog() { clearTimeout(watchdogT); watchdogT = null; }
+
+  const loadStep = (label, frac) => {
+    stepEl.textContent = label;
+    fillEl.style.width = Math.round(frac * 100) + "%";
+    if (watchdogT) armWatchdog(); // real progress → give the next step fresh time
+  };
 
   function showError(msg) {
     errorEl.textContent = msg;
@@ -34,11 +52,7 @@
     const btn = landing.querySelector(".btn-primary");
     btn.disabled = true;
     showLoading();
-    /* overall watchdog: an app must never become a silent spinner */
-    const watchdog = setTimeout(() => {
-      hideLoading();
-      showError("Still nothing after 45 seconds 😔 — something is blocking requests to GitHub. Try disabling your ad-blocker / VPN / browser turbo-mode for this page and press the button again.");
-    }, 45000);
+    armWatchdog();
     try {
       raw = await GH.fetchWrapped(username, loadStep);
       stats = Stats.compute(raw);
@@ -52,7 +66,7 @@
       else if (e.code === "network") showError("Requests to GitHub are blocked: disable ad-blocker / VPN / turbo-mode / antivirus web filter for this page and retry 🔁");
       else showError("Something went wrong while talking to GitHub. Check your connection and retry 🔁");
     } finally {
-      clearTimeout(watchdog);
+      disarmWatchdog();
       btn.disabled = false;
     }
   }

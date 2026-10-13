@@ -29,6 +29,7 @@ Spotify Wrapped — but for your GitHub. Type any username and get an **animated
 - 🦉 **your coding rhythm** — night owl or daytime coder? weekend warrior?
 - 🃏 **your coding archetype** — *Night Owl, AI Native, Weekend Warrior, Grid Painter, Polyglot…*
 - 📦 **repos that defined your year** + your AI-era footprint 🤖
+- 🌍 **English & Русский** — one-tap language switch, works even mid-story, poster included
 
 …ending with a **shareable 1080×1080 poster PNG** you can download and post anywhere.
 
@@ -77,8 +78,9 @@ You can clone the repo and double-click `index.html` — it works.
 ```
 wrapped-2026/
 ├── index.html          # landing + story viewport
-├── styles.css          # dark theme, glassy cards, story animations
+├── styles.css          # neo-brutalist "zine" theme: paper, ink, hard shadows
 ├── js/
+│   ├── i18n.js         # EN/RU strings for landing, story and poster
 │   ├── github.js       # the data layer (fetch + localStorage cache)
 │   ├── stats.js        # turns raw data into streaks, languages, archetypes
 │   ├── poster.js       # draws the 1080×1080 PNG on canvas

@@ -13,24 +13,41 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="bg-blob b1"></div>
-  <div class="bg-blob b2"></div>
-  <div class="bg-blob b3"></div>
+  <!-- paper doodles backdrop -->
+  <div class="doodle d-star"></div>
+  <div class="doodle d-circle"></div>
+  <div class="doodle d-squig"></div>
+  <div class="doodle d-plus">+</div>
 
   <!-- ═══════════ Landing ═══════════ -->
   <main id="landing" class="landing">
+    <div class="lang-switch" id="lang-switch" role="group" aria-label="language">
+      <button class="lang-btn" data-lang="en" type="button">EN</button>
+      <button class="lang-btn" data-lang="ru" type="button">RU</button>
+    </div>
+
+    <div class="stamp" id="badge">NO LOGIN!</div>
+
     <img src="assets/logo.png" alt="logo" class="logo" />
-    <h1 class="title">GitHub Wrapped <span class="year">2026</span></h1>
-    <p class="tagline">Your year in code as a beautiful shareable story.<br>
-      No login. No server. <strong>Just a username.</strong></p>
+
+    <h1 class="title">
+      <span class="t-row">GITHUB</span>
+      <span class="t-row t-outline">WRAPPED</span>
+      <span class="t-row t-year">2026</span>
+    </h1>
+
+    <p class="tagline">
+      <span data-i18n="tagline"></span><br>
+      <span data-i18n-html="tagline2"></span>
+    </p>
 
     <form id="form" class="form" autocomplete="off">
       <input id="username" type="text" inputmode="text" placeholder="your GitHub username"
              spellcheck="false" autocapitalize="off" required />
-      <button type="submit" class="btn-primary">Wrap my year ✨</button>
+      <button type="submit" class="btn-primary" data-i18n="wrapBtn"></button>
     </form>
 
-    <p class="demo-line">see a demo first:
+    <p class="demo-line"><span data-i18n="demoLine"></span>
       <button class="chip" data-demo="sindresorhus" type="button">sindresorhus</button>
       <button class="chip" data-demo="torvalds" type="button">torvalds</button>
       <button class="chip" data-demo="hilsetapp" type="button">hilsetapp</button>
@@ -39,16 +56,18 @@
     <p id="error" class="error" hidden></p>
 
     <footer class="foot">
-      🔒 everything runs in your browser — nothing is uploaded or tracked<br>
-      <a href="https://github.com/hilsetapp/wrapped-2026" target="_blank" rel="noopener">open source · star it ★</a>
+      🔒 <span data-i18n="privacy"></span><br>
+      <a class="foot-link" href="https://github.com/hilsetapp/wrapped-2026" target="_blank" rel="noopener">★ open source</a>
     </footer>
   </main>
+
+  <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
 
   <!-- ═══════════ Loading overlay ═══════════ -->
   <div id="loading" class="loading" hidden>
     <div class="loader-card">
       <div class="spinner"></div>
-      <p id="loading-step">waking up…</p>
+      <p id="loading-step">…</p>
       <div class="loading-bar"><span id="loading-fill"></span></div>
     </div>
   </div>
@@ -67,6 +86,7 @@
     </div>
   </section>
 
+  <script src="js/i18n.js"></script>
   <script src="js/github.js"></script>
   <script src="js/stats.js"></script>
   <script src="js/poster.js"></script>

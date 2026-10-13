@@ -32,3 +32,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   overrode the `hidden` attribute (classic CSS priority gotcha), so the loading
   overlay was rendered on top of the landing from page load and swallowed all clicks —
   the app looked permanently stuck. Added the canonical `[hidden] { display: none !important; }` guard.
+
+## [0.2.0] — 2026-10-13
+
+### Changed
+- 🎨 **Full visual identity overhaul**: out with the generic AI-neon look (blobs,
+  glass cards, gradient text), in with a hand-printed neo-brutalist "zine" —
+  paper + halftone, thick ink borders, hard offset shadows, rotated stickers,
+  marquee ticker, per-slide accents, count-up numbers, trading-card archetype
+  reveal and a tracklist for repos. Poster PNG redesigned to match.
+
+### Added
+- 🌍 **Bilingual EN/RU**: landing, story, archetypes, errors, share text and even
+  the downloadable poster — switch anywhere (landing top-right, story top-left);
+  choice persists, browser language is auto-detected.
+- New flat sticker-style logo and OG banner.

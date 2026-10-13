@@ -75,35 +75,35 @@ const GH = (() => {
     const user = username.trim().toLowerCase();
     const cached = readCache(user);
     if (cached) {
-      onStep("found in your browser cache ✨", 1);
+      onStep("Cache", 1);
       return cached;
     }
 
-    onStep("fetching profile…", 0.15);
+    onStep("Profile", 0.15);
     const profile = await getJSON(`https://api.github.com/users/${encodeURIComponent(user)}`);
 
-    onStep("reading repositories…", 0.35);
+    onStep("Repos", 0.35);
     const repos = await getJSON(
       `https://api.github.com/users/${encodeURIComponent(user)}/repos?per_page=100&sort=updated`
     );
 
-    onStep("painting your contribution grid…", 0.55);
+    onStep("Grid", 0.55);
     /* this API generates the grid lazily on first request → give it extra time */
     const contrib = await optional(
       getJSON(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(user)}?y=${YEAR}`, 30000)
     );
 
-    onStep("counting pull requests…", 0.72);
+    onStep("Prs", 0.72);
     const prs = await optional(
       getJSON(`https://api.github.com/search/issues?q=type:pr+author:${encodeURIComponent(user)}+created:${YEAR}-01-01..${YEAR}-12-31&per_page=1`)
     );
 
-    onStep("counting issues…", 0.8);
+    onStep("Issues", 0.8);
     const issues = await optional(
       getJSON(`https://api.github.com/search/issues?q=type:issue+author:${encodeURIComponent(user)}+created:${YEAR}-01-01..${YEAR}-12-31&per_page=1`)
     );
 
-    onStep("sensing your coding rhythm…", 0.9);
+    onStep("Rhythm", 0.9);
     const events = await optional(
       getJSON(`https://api.github.com/users/${encodeURIComponent(user)}/events/public?per_page=100`)
     );
@@ -118,7 +118,7 @@ const GH = (() => {
       events: Array.isArray(events) ? events : [],
     };
 
-    onStep("wrapping it up…", 1);
+    onStep("Done", 1);
     writeCache(user, data);
     return data;
   }

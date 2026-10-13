@@ -1,11 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
-   app.js — story engine + UI orchestration.
+   app.js — story engine + UI orchestration (bilingual edition).
    ═══════════════════════════════════════════════════════════════ */
 
 (() => {
   const $ = (sel) => document.querySelector(sel);
   const SITE_URL = "https://hilsetapp.github.io/wrapped-2026/";
   const SLIDE_MS = 6500;
+  const ACCENTS = ["lime", "sun", "pink", "blue", "violet", "red"];
 
   const landing = $("#landing"), story = $("#story"), loading = $("#loading");
   const slidesEl = $("#slides"), progressEl = $("#progress");
@@ -16,29 +17,57 @@
   let slideFns = [];
   let idx = 0;
   let timer = null, startedAt = 0, remaining = SLIDE_MS;
-  let posterReady = false;
+
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  /* ══════════ language ══════════ */
+  const ARCH_ACCENT = { community_star: "sun", star_collector: "sun", night_owl: "violet", ai_native: "lime",
+    weekend_warrior: "pink", consistent: "blue", grid_painter: "pink", polyglot: "blue", builder: "blue", explorer: "lime" };
+
+  function applyLanding() {
+    document.documentElement.lang = I18N.getLang();
+    document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = I18N.t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = I18N.t(el.dataset.i18nHtml); });
+    document.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("on", b.dataset.lang === I18N.getLang()));
+    $("#username").placeholder = I18N.getLang() === "ru" ? "твой ник на GitHub" : "your GitHub username";
+    /* ticker */
+    const words = I18N.getLang() === "ru"
+      ? ["GITHUB WRAPPED 2026", "без логина", "в код верим", "постер внутри", "открытый код", "поставь ★"]
+      : ["GITHUB WRAPPED 2026", "no login", "just a username", "poster inside", "open source", "star it ★"];
+    const seq = words.map((w, i) => `<span class="${i % 2 ? "a" : "b"}">${esc(w)}</span><span>•</span>`).join("");
+    $("#ticker").innerHTML = seq + seq; /* 2 copies for the -50% loop */
+  }
+
+  function setLang(l) {
+    I18N.setLang(l);
+    applyLanding();
+    if (stats && !story.hidden) {
+      buildDeck();                 // re-translate the whole deck
+      [...slidesEl.children].forEach((el) => { delete el.dataset.built; });
+      reShowCurrent();
+    }
+  }
+
+  document.querySelectorAll(".lang-btn").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
 
   /* ══════════ loading ══════════ */
   const showLoading = () => { loading.hidden = false; fillEl.style.width = "4%"; };
   const hideLoading = () => { loading.hidden = true; };
 
-  /* overall watchdog, re-armed on every progress step — the app must
-     never become a silent spinner */
   let watchdogT = null;
   function armWatchdog() {
     clearTimeout(watchdogT);
     watchdogT = setTimeout(() => {
-      hideLoading();
-      watchdogT = null;
-      showError("Still nothing after 45 seconds 😔 — something is blocking requests to GitHub. Try disabling your ad-blocker / VPN / browser turbo-mode for this page and press the button again.");
+      hideLoading(); watchdogT = null;
+      showError(I18N.t("errorWatchdog"));
     }, 45000);
   }
   function disarmWatchdog() { clearTimeout(watchdogT); watchdogT = null; }
 
-  const loadStep = (label, frac) => {
-    stepEl.textContent = label;
+  const loadStep = (key, frac) => {
+    stepEl.textContent = I18N.t("step" + key);
     fillEl.style.width = Math.round(frac * 100) + "%";
-    if (watchdogT) armWatchdog(); // real progress → give the next step fresh time
+    if (watchdogT) armWatchdog();
   };
 
   function showError(msg) {
@@ -60,11 +89,11 @@
       enterStory();
     } catch (e) {
       hideLoading();
-      if (e.code === 404) showError("Couldn't find @" + username + " on GitHub — check the spelling 👀");
-      else if (e.code === 403) showError("GitHub's free API limit is hit (60 requests/hour per visitor). Take a coffee and try again ☕");
-      else if (e.code === "timeout") showError("GitHub API is not answering (timeout). Might be a slow connection or a VPN — try again 🔁");
-      else if (e.code === "network") showError("Requests to GitHub are blocked: disable ad-blocker / VPN / turbo-mode / antivirus web filter for this page and retry 🔁");
-      else showError("Something went wrong while talking to GitHub. Check your connection and retry 🔁");
+      if (e.code === 404) showError(I18N.t("error404", { u: username }));
+      else if (e.code === 403) showError(I18N.t("error403"));
+      else if (e.code === "timeout") showError(I18N.t("errorTimeout"));
+      else if (e.code === "network") showError(I18N.t("errorNetwork"));
+      else showError(I18N.t("errorGeneric"));
     } finally {
       disarmWatchdog();
       btn.disabled = false;
@@ -74,7 +103,6 @@
   function resetToLanding() {
     clearTimeout(timer);
     timer = null;
-    posterReady = false;
     idx = 0;
     story.hidden = true;
     landing.hidden = false;
@@ -83,137 +111,177 @@
     $("#username").focus();
   }
 
-  /* ══════════ deck construction ══════════ */
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  /* ══════════ numbers that count up ══════════ */
+  function runCounters(slideEl) {
+    slideEl.querySelectorAll(".count-up[data-val]").forEach((el) => {
+      const target = Number(el.dataset.val);
+      const t0 = performance.now(), dur = 950;
+      const tick = (t) => {
+        const p = Math.min(1, (t - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = I18N.fmt(Math.round(target * eased));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
 
-  const HEAT_COLORS = ["rgba(255,255,255,.08)", "#155e75", "#0e7490", "#22d3ee", "#a5f3fc"];
+  /* ══════════ deck construction ══════════ */
+  const HEAT_COLORS = ["#ffffff", "#bdf3a0", "#7adc3e", "#2ea90f", "#175c05"];
 
   function heatmapHTML(days) {
-    /* take the last full 24 weeks (~ late half of year) so the grid fits the phone */
-    const cells = days.slice(-24 * 7);
+    const cells = days.slice(-21 * 7); /* ~last 5 months fit a phone nicely */
     let cols = '<div class="heat-col">';
     cells.forEach((d, i) => {
       cols += `<span class="heat-cell" style="background:${HEAT_COLORS[d.level] || HEAT_COLORS[0]}" title="${d.date}: ${d.count}"></span>`;
       if (i % 7 === 6) cols += '</div><div class="heat-col">';
     });
     cols += "</div>";
-    return `<div class="heatmap">${cols}</div>`;
+    return `<div class="evidence" data-case="2026-A"><div class="heatmap">${cols}</div></div>`;
+  }
+
+  function archVars() {
+    const f = I18N.fmt;
+    return {
+      year: stats.year, next: stats.year + 1, stars: f(stats.stars), total: f(stats.total),
+      nightPct: (stats.rhythm || {}).nightPct, aiCount: stats.ai.count,
+      weekendPct: (stats.heat || {}).weekendPct, longest: (stats.heat || {}).longest,
+      langs: stats.langList.length,
+    };
   }
 
   function buildDeck() {
     const p = raw.profile;
-    const f = Stats.fmt;
+    const f = I18N.fmt;
+    const V = archVars();
     slideFns = [];
+    let accI = 0;
+    const acc = (name) => name || ACCENTS[accI++ % ACCENTS.length];
 
     /* — 1: intro — */
-    slideFns.push(() => `
-      <img class="avatar-xl" src="${esc(p.avatar_url)}" alt="avatar">
+    slideFns.push(() => ({ accent: acc("lime"), html: `
+      <div class="polaroid"><img src="${esc(p.avatar_url)}" alt="avatar"></div>
       <p class="kicker">GitHub Wrapped</p>
-      <h2 class="h-lg">@${esc(p.login)},<br>your ${stats.year} in code</h2>
-      <p class="sub">tap or wait — the story plays itself</p>
-    `);
+      <h2 class="h-lg">@${esc(p.login)},</h2>
+      <h2 class="h-xl" style="font-size:clamp(44px,11vw,72px)">${I18N.t("introTitle", { year: stats.year })}</h2>
+      <p class="sub">${I18N.t("introSub")}</p>
+    ` }));
 
     /* — 2: big numbers — */
-    slideFns.push(() => `
-      <p class="kicker">First — the headline</p>
-      <h2 class="h-xl">${f(stats.total)}</h2>
-      <p class="sub">contributions in ${stats.year}</p>
+    slideFns.push(() => ({ accent: acc(), html: `
+      <p class="kicker">${I18N.t("kHeadline")}</p>
+      <h2 class="h-xl count-up" data-val="${stats.total}">0</h2>
+      <p class="sub">${I18N.t("contribIn", { year: stats.year })}</p>
       <div class="stat-row">
-        <div class="stat"><b>${f(stats.prs)}</b><span>pull requests</span></div>
-        <div class="stat"><b>${f(stats.reposMade)}</b><span>new repos</span></div>
-        <div class="stat"><b>${f(stats.stars)}</b><span>stars earned ⭐</span></div>
+        <div class="stat"><b class="count-up" data-val="${stats.prs ?? 0}">0</b><span>${I18N.t("cPRs")}</span></div>
+        <div class="stat"><b class="count-up" data-val="${stats.reposMade}">0</b><span>${I18N.t("cRepos")}</span></div>
+        <div class="stat"><b class="count-up" data-val="${stats.stars}">0</b><span>${I18N.t("cStars")} ⭐</span></div>
       </div>
-    `);
+    ` }));
 
     /* — 3: languages — */
     if (stats.langList.length) {
-      const top = stats.langList[0];
-      slideFns.push(() => `
-        <p class="kicker">Your language of the year</p>
-        <h2 class="h-lg" style="color:${top.color}">${esc(top.name)}</h2>
-        <p class="sub">${top.pct}% of your repositories</p>
-        <div class="lang-bar">
-          ${stats.langList.map((l) => `
-            <div class="lang-row">
-              <span class="lang-dot" style="background:${l.color}"></span>
-              <span class="lang-name">${esc(l.name)}</span>
-              <span class="lang-track"><span class="lang-fill" style="width:${Math.max(l.pct, 3)}%;background:${l.color}"></span></span>
-              <span class="lang-pct">${l.pct}%</span>
-            </div>`).join("")}
-        </div>
-      `);
+      slideFns.push(() => {
+        const top = stats.langList[0];
+        return { accent: acc(), html: `
+          <p class="kicker">${I18N.t("kLang")}</p>
+          <h2 class="h-xl" style="font-size:clamp(40px,10vw,64px);color:${top.color};-webkit-text-stroke:2px var(--ink)">${esc(top.name)}</h2>
+          <p class="sub">${I18N.t("ofRepos", { pct: top.pct })}</p>
+          <div class="lang-bar">
+            ${stats.langList.map((l) => `
+              <div class="lang-row">
+                <span class="lang-name">${esc(l.name)}</span>
+                <span class="lang-track"><span class="lang-fill" style="width:${Math.max(l.pct, 4)}%;background:repeating-linear-gradient(45deg, ${l.color} 0 9px, rgba(23,18,11,.35) 9px 11px)"></span></span>
+                <span class="lang-pct">${l.pct}%</span>
+              </div>`).join("")}
+          </div>
+        ` };
+      });
     }
 
     /* — 4: heatmap + streak — */
     if (stats.heat) {
-      const b = stats.heat.busiest;
-      const nice = b.date ? new Date(b.date + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null;
-      slideFns.push(() => `
-        <p class="kicker">Your year, painted</p>
-        <h2 class="h-lg">The grid knows everything</h2>
-        ${heatmapHTML(stats.heat.days)}
-        <div class="stat-row">
-          <div class="stat"><b>🔥 ${stats.heat.longest}d</b><span>longest streak</span></div>
-          <div class="stat"><b>${stats.heat.current}d</b><span>current streak</span></div>
-          ${nice ? `<div class="stat"><b>${b.count}</b><span>your wildest day · ${nice}</span></div>` : ""}
-        </div>
-      `);
+      slideFns.push(() => {
+        const b = stats.heat.busiest;
+        const nice = b.date ? I18N.dateFmt(b.date) : null;
+        return { accent: acc(), html: `
+          <p class="kicker">${I18N.t("kGrid")}</p>
+          <h2 class="h-lg">${I18N.t("gridTitle")}</h2>
+          ${heatmapHTML(stats.heat.days)}
+          <div class="stat-row">
+            <div class="stat"><b>🔥 ${stats.heat.longest}d</b><span>${I18N.t("cLongest")}</span></div>
+            <div class="stat"><b>${stats.heat.current}d</b><span>${I18N.t("cCurrent")}</span></div>
+            ${nice ? `<div class="stat"><b>${b.count}</b><span>${I18N.t("cWildest", { date: nice })}</span></div>` : ""}
+          </div>
+        ` };
+      });
     }
 
     /* — 5: rhythm — */
     if (stats.rhythm || stats.heat) {
-      const r = stats.rhythm;
-      const w = stats.heat ? stats.heat.weekendPct : null;
-      slideFns.push(() => `
-        <p class="kicker">When do you code?</p>
-        <div class="big-emoji">${r ? r.peak.emo : "⏰"}</div>
-        <h2 class="h-lg">${r ? "a true " + r.peak.label : "steady all week"}</h2>
-        <p class="sub">${r ? `based on your last ${r.totalEvents} public events (GitHub keeps ~90 days)` : ""}</p>
-        <div class="stat-row">
-          ${r ? `<div class="stat"><b>${r.nightPct}%</b><span>activity 22:00–06:00</span></div>` : ""}
-          ${w != null ? `<div class="stat"><b>${w}%</b><span>contributions on weekends</span></div>` : ""}
-        </div>
-      `);
+      slideFns.push(() => {
+        const r = stats.rhythm;
+        const w = stats.heat ? stats.heat.weekendPct : null;
+        const label = r ? I18N.t("r" + r.peak.id[0].toUpperCase() + r.peak.id.slice(1)) : null;
+        return { accent: acc(), html: `
+          <p class="kicker">${I18N.t("kRhythm")}</p>
+          <div class="big-emoji">${r ? r.peak.emo : "⏰"}</div>
+          <h2 class="h-lg">${r ? I18N.t("aTrue", { label }) : I18N.t("steady")}</h2>
+          ${r ? `<p class="sub">${I18N.t("rhythmSub", { n: r.totalEvents })}</p>` : ""}
+          <div class="stat-row">
+            ${r ? `<div class="stat"><b>${r.nightPct}%</b><span>${I18N.t("cNight")}</span></div>` : ""}
+            ${w != null ? `<div class="stat"><b>${w}%</b><span>${I18N.t("cWeekend")}</span></div>` : ""}
+          </div>
+        ` };
+      });
     }
 
     /* — 6: archetype reveal — */
-    slideFns.push(() => `
-      <p class="kicker">Your coding archetype</p>
-      <div class="arch-card">
-        <div class="big-emoji">${stats.arch.emoji}</div>
-        <div class="arch-title">${esc(stats.arch.title)}</div>
-        ${stats.arch.secondary ? `<p class="sub" style="margin:2px 0 6px">× with a hint of ${esc(stats.arch.secondary.emoji)} ${esc(stats.arch.secondary.title)}</p>` : ""}
-        <p class="arch-blurb">${esc(stats.arch.blurb)}</p>
-      </div>
-    `);
+    slideFns.push(() => {
+      const a = I18N.arch(stats.arch.id, V);
+      const sec = stats.arch.secondaryId ? I18N.arch(stats.arch.secondaryId, V) : null;
+      return { accent: ARCH_ACCENT[stats.arch.id] || acc(), html: `
+        <p class="kicker">${I18N.t("kArch")}</p>
+        <div class="arch-card" style="--acc:var(--${ARCH_ACCENT[stats.arch.id] || "lime"})">
+          <div class="arch-head"><span>GitHub Wrapped</span><span>${I18N.t("rare", { year: stats.year })}</span></div>
+          <div class="arch-body">
+            <div class="arch-crest">${stats.arch.emoji}</div>
+            <div class="arch-title">${esc(a.title)}</div>
+            ${sec ? `<div class="arch-sub">${I18N.t("hintOf", { emoji: stats.arch.secondaryEmoji, title: sec.title })}</div>` : ""}
+            <p class="arch-blurb">${esc(a.blurb)}</p>
+          </div>
+        </div>
+      ` };
+    });
 
     /* — 7: repos + AI footprint — */
     if (stats.topRepos.length || stats.ai.count) {
-      slideFns.push(() => `
-        <p class="kicker">Signature work</p>
-        <h2 class="h-lg">Repos that defined the year</h2>
-        <div class="repo-list">
-          ${stats.topRepos.map((r) => `
-            <div class="repo-item"><span>📦 ${esc(r.name)}</span><span class="stars">★ ${f(r.stars)}</span></div>`).join("")}
+      slideFns.push(() => ({ accent: acc(), html: `
+        <p class="kicker">${I18N.t("kRepos")}</p>
+        <h2 class="h-lg">${I18N.t("reposTitle")}</h2>
+        <div class="tracklist">
+          <span class="tracklist-head">▸ ${I18N.t("aSide", { year: stats.year })}</span>
+          ${stats.topRepos.map((r, i) => `
+            <div class="repo-item"><span class="no">${String(i + 1).padStart(2, "0")}</span><span class="name">${esc(r.name)}</span><span class="stars">★ ${f(r.stars)}</span></div>`).join("")}
         </div>
-        ${stats.ai.count ? `<p class="sub" style="margin-top:14px">🤖 +${stats.ai.count} AI-flavored repos — certified ${stats.year} material</p>` : ""}
-      `);
+        ${stats.ai.count ? `<span class="ai-stamp">🤖 ${I18N.t("aiLine", { n: stats.ai.count, year: stats.year })}</span>` : ""}
+      ` }));
     }
 
     /* — 8: finale — */
-    slideFns.push(() => `
-      <p class="kicker">That's a wrap</p>
+    slideFns.push(() => ({ accent: acc("lime"), html: `
+      <p class="kicker">${I18N.t("kFinale")}</p>
       <canvas id="poster-canvas" width="1080" height="1080"></canvas>
       <div class="finale-actions">
-        <button class="btn-primary" id="btn-download">⬇️ Download poster PNG</button>
+        <button class="btn-primary" id="btn-download">${I18N.t("btnDownload")}</button>
         <div class="share-row">
-          <button class="btn-ghost" id="btn-x">𝕏 Share</button>
+          <button class="btn-ghost" id="btn-x">𝕏</button>
           <button class="btn-ghost" id="btn-tg">✈️ Telegram</button>
           <button class="btn-ghost" id="btn-copy">🔗 Copy</button>
         </div>
-        <button class="btn-ghost" id="btn-again">↻ make yours</button>
+        <button class="btn-ghost" id="btn-again">${I18N.t("btnAgain")}</button>
       </div>
-    `);
+    ` }));
   }
 
   /* ══════════ story engine ══════════ */
@@ -228,6 +296,20 @@
     show(0);
   }
 
+  function reShowCurrent() {
+    const slides = slidesEl.children;
+    [...slides].forEach((el, i) => {
+      if (el.classList.contains("active")) {
+        const def = slideFns[i]();
+        el.innerHTML = def.html;
+        el.style.setProperty("--acc", "var(--" + def.accent + ")");
+        el.dataset.built = "1";
+        runCounters(el);
+        if (i === slideFns.length - 1) wireFinale(el);
+      }
+    });
+  }
+
   function show(n) {
     clearTimeout(timer);
     const slides = slidesEl.children;
@@ -238,8 +320,11 @@
       el.classList.toggle("active", i === idx);
       el.classList.toggle("left", i < idx);
       if (i === idx && !el.dataset.built) {
-        el.innerHTML = slideFns[i]();
+        const def = slideFns[i]();
+        el.innerHTML = def.html;
+        el.style.setProperty("--acc", "var(--" + def.accent + ")");
         el.dataset.built = "1";
+        runCounters(el);
         if (i === slideFns.length - 1) wireFinale(el);
       }
       segs[i].classList.toggle("done", i < idx);
@@ -250,8 +335,7 @@
     if (!last) {
       const seg = segs[idx];
       requestAnimationFrame(() => {
-        const span = seg.firstChild;
-        span.style.animationDuration = SLIDE_MS + "ms";
+        seg.firstChild.style.animationDuration = SLIDE_MS + "ms";
         seg.classList.add("active");
       });
       startedAt = Date.now();
@@ -282,14 +366,14 @@
   async function wireFinale(el) {
     const canvas = el.querySelector("#poster-canvas");
     await Poster.draw(canvas, stats, raw.profile);
-    posterReady = true;
 
     el.querySelector("#btn-download").onclick = () => Poster.download(canvas, raw.profile.login);
 
-    const shareText =
-      `My GitHub Wrapped ${stats.year} 🔥 ` +
-      `${Stats.fmt(stats.total)} contributions, archetype: ${stats.arch.emoji} ${stats.arch.title}. ` +
-      `Make yours — no login: ${SITE_URL}`;
+    const archText = I18N.arch(stats.arch.id, archVars());
+    const shareText = I18N.t("share", {
+      year: stats.year, total: I18N.fmt(stats.total),
+      emoji: stats.arch.emoji, title: archText.title, url: SITE_URL,
+    });
 
     el.querySelector("#btn-x").onclick = () =>
       window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText), "_blank");
@@ -298,9 +382,10 @@
     el.querySelector("#btn-copy").onclick = async (ev) => {
       try {
         await navigator.clipboard.writeText(shareText);
-        ev.target.textContent = "✓ copied";
-        setTimeout(() => (ev.target.textContent = "🔗 Copy"), 1600);
-      } catch (_) { /* clipboard blocked — no big deal */ }
+        const old = ev.target.textContent;
+        ev.target.textContent = I18N.t("shared");
+        setTimeout(() => (ev.target.textContent = old), 1600);
+      } catch (_) { /* clipboard blocked */ }
     };
     el.querySelector("#btn-again").onclick = resetToLanding;
   }
@@ -309,7 +394,7 @@
   $("#form").addEventListener("submit", (e) => {
     e.preventDefault();
     const u = $("#username").value.trim();
-    if (u) start(u);
+    if (u) start(u.replace(/^@/, ""));
   });
 
   document.querySelectorAll("[data-demo]").forEach((chip) =>
@@ -335,8 +420,18 @@
     else if (e.key === "Escape") resetToLanding();
   });
 
+  applyLanding();
+
   /* deep link: wrapped-2026/?u=torvalds jumps straight into the story */
   const deep = new URLSearchParams(location.search).get("u");
+
+  /* lang switch inside the story frame too */
+  const storySwitch = document.createElement("div");
+  storySwitch.className = "lang-switch story-switch";
+  storySwitch.innerHTML = `<button class="lang-btn" data-lang="en" type="button">EN</button><button class="lang-btn" data-lang="ru" type="button">RU</button>`;
+  storySwitch.addEventListener("click", (e) => { if (e.target.dataset.lang) setLang(e.target.dataset.lang); });
+  $("#story .frame").appendChild(storySwitch);
+
   if (deep) {
     $("#username").value = deep;
     start(deep);

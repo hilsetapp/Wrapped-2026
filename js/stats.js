@@ -87,23 +87,27 @@ const Stats = (() => {
         { label: "night owl 🦉", emo: "🦉", from: 22, to: 5, n: hours.filter((h) => h >= 22 || h < 5).length },
       ];
       buckets.sort((a, b) => b.n - a.n);
-      rhythm = { nightPct, peak: buckets[0], totalEvents: hours.length };
+      const PEAK = { "early bird 🌅": "early", "daytime coder ☀️": "day", "evening hacker 🌇": "evening", "night owl 🦉": "night" };
+      const PEAK_EMO = { early: "🌅", day: "☀️", evening: "🌇", night: "🦉" };
+      const pid = PEAK[buckets[0].label] || "day";
+      rhythm = { nightPct, peak: { id: pid, emo: PEAK_EMO[pid] }, totalEvents: hours.length };
     }
 
-    /* ── archetype ── */
+    /* ── archetype (stable ids — texts live in i18n.js) ── */
+    const EMOJI = { community_star: "🌟", star_collector: "⭐", night_owl: "🦉", ai_native: "🤖",
+      weekend_warrior: "⚔️", consistent: "🧘", grid_painter: "🎨", polyglot: "🌍", builder: "🔨", explorer: "🌱" };
+
     const arches = [];
-    if (stars >= 500) arches.push({ emoji: "🌟", title: "Community Star", blurb: "People actually use what you build. " + fmt(stars) + " stars say it loud." });
-    if (stars >= 100) arches.push({ emoji: "⭐", title: "Star Collector", blurb: fmt(stars) + " stars collected — strangers found your code useful. That never gets old." });
-    if (rhythm && rhythm.nightPct >= 40) arches.push({ emoji: "🦉", title: "Night Owl", blurb: rhythm.nightPct + "% of your recent activity happens between 22:00 and 06:00. The best bugs are found at 2am." });
-    if (aiRepos.length >= 2) arches.push({ emoji: "🤖", title: "AI Native", blurb: aiRepos.length + " projects about AI, agents, LLMs — you are building the hot thing of the era." });
-    if (heat && heat.weekendPct >= 35) arches.push({ emoji: "⚔️", title: "Weekend Warrior", blurb: heat.weekendPct + "% of contributions on weekends. You code like you mean it — on your own time." });
-    if (heat && heat.longest >= 30) arches.push({ emoji: "🧘", title: "The Consistent", blurb: "A " + heat.longest + "-day streak. Discipline > motivation, proven by your graph." });
-    if (total >= 1500) arches.push({ emoji: "🎨", title: "Grid Painter", blurb: fmt(total) + " contributions — your profile graph is modern art." });
-    if (langList.length >= 5) arches.push({ emoji: "🌍", title: "Polyglot", blurb: langList.length + " languages in " + year + ". Jack of all trades, master of shipping." });
-    let arch;
-    if (arches.length) { arch = arches[0]; if (arches[1]) arch = { ...arches[0], secondary: arches[1] }; }
-    else if (total > 0) arch = { emoji: "🔨", title: "The Builder", blurb: "No gimmicks, just shipped code. Keep going — " + (year + 1) + " is yours." };
-    else arch = { emoji: "🌱", title: "The Explorer", blurb: "Quiet graph so far — every senior dev started here. Your year is loading…" };
+    if (stars >= 500) arches.push("community_star");
+    if (stars >= 100) arches.push("star_collector");
+    if (rhythm && rhythm.nightPct >= 40) arches.push("night_owl");
+    if (aiRepos.length >= 2) arches.push("ai_native");
+    if (heat && heat.weekendPct >= 35) arches.push("weekend_warrior");
+    if (heat && heat.longest >= 30) arches.push("consistent");
+    if (total >= 1500) arches.push("grid_painter");
+    if (langList.length >= 5) arches.push("polyglot");
+    const archId = arches[0] || (total > 0 ? "builder" : "explorer");
+    const arch = { id: archId, secondaryId: arches[1] || null, emoji: EMOJI[archId], secondaryEmoji: arches[1] ? EMOJI[arches[1]] : null };
 
     return {
       year, total, prs: raw.prs, issues: raw.issues, stars,

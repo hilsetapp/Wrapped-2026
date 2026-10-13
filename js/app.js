@@ -279,6 +279,7 @@
           <button class="btn-ghost" id="btn-tg">✈️ Telegram</button>
           <button class="btn-ghost" id="btn-copy">🔗 Copy</button>
         </div>
+        <p class="share-hint" id="share-hint" hidden>${I18N.t("hintAttach")}</p>
         <button class="btn-ghost" id="btn-again">${I18N.t("btnAgain")}</button>
       </div>
     ` }));
@@ -375,10 +376,32 @@
       emoji: stats.arch.emoji, title: archText.title, url: SITE_URL,
     });
 
+    /* Sharing images into social nets:
+       - mobile: native share sheet WITH the poster file attached
+       - desktop: social_url only carries text → pre-download the poster and hint to attach it */
+    const hint = el.querySelector("#share-hint");
+    const shareToSocial = async (intentUrl) => {
+      let nativeDone = false;
+      try {
+        const file = await new Promise((res) =>
+          canvas.toBlob((b) => res(b ? new File([b], "github-wrapped-2026-" + raw.profile.login + ".png", { type: "image/png" }) : null), "image/png"));
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], text: shareText });
+          nativeDone = true;
+        }
+      } catch (err) {
+        if (err && err.name === "AbortError") return; /* user closed the native sheet */
+      }
+      if (nativeDone) return;
+      Poster.download(canvas, raw.profile.login);
+      window.open(intentUrl, "_blank");
+      hint.hidden = false;
+    };
+
     el.querySelector("#btn-x").onclick = () =>
-      window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText), "_blank");
+      shareToSocial("https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText));
     el.querySelector("#btn-tg").onclick = () =>
-      window.open("https://t.me/share/url?url=" + encodeURIComponent(SITE_URL) + "&text=" + encodeURIComponent(shareText), "_blank");
+      shareToSocial("https://t.me/share/url?url=" + encodeURIComponent(SITE_URL) + "&text=" + encodeURIComponent(shareText));
     el.querySelector("#btn-copy").onclick = async (ev) => {
       try {
         await navigator.clipboard.writeText(shareText);

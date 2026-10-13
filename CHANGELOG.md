@@ -47,3 +47,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   the downloadable poster — switch anywhere (landing top-right, story top-left);
   choice persists, browser language is auto-detected.
 - New flat sticker-style logo and OG banner.
+
+## [0.2.1] — 2026-10-13
+
+### Fixed
+- 🖼 **Poster layout collision**: content overflowed the card (handle overlapped
+  the headline number, stat boxes crashed into the footer, the archetype ticket
+  fell off the card). Recomputed the vertical grid — everything fits inside the
+  940×940 card now; the "make yours" footer moved into the paper margin.
+- 🌍 Default language is now **English** (previous auto-detection started RU for
+  Russian browsers; saved choice still persists).
+
+### Added
+- 📤 **Smarter sharing**: X/Telegram buttons now pre-download the poster and show
+  an "attach it" hint on desktop; on mobile they open the native share sheet with
+  the PNG already attached (Web Share API).

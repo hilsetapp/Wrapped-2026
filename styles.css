@@ -436,3 +436,9 @@ body::before {
 .btn-ghost:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
 .share-row { display: flex; gap: 10px; }
 .share-row .btn-ghost { flex: 1; }
+.share-hint {
+  margin: 0; font: 700 11.5px var(--mono);
+  background: var(--sun); border: 2px solid var(--ink); border-radius: 6px;
+  padding: 6px 10px; transform: rotate(-1deg);
+  animation: pop .3s cubic-bezier(.2, 1.6, .4, 1) backwards;
+}

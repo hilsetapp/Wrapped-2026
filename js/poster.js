@@ -79,110 +79,107 @@ const Poster = (() => {
     for (let y = 16; y < SIZE; y += 30) for (let x = 16; x < SIZE; x += 30) ctx.fillRect(x, y, 2.5, 2.5);
 
     /* ── flat doodles ── */
-    star(ctx, 120, 140, 66, SUN);
+    star(ctx, 130, 70, 52, SUN);
     ctx.save();
-    ctx.setLineDash([14, 12]);
-    ctx.beginPath(); ctx.arc(968, 168, 64, 0, Math.PI * 2);
+    ctx.setLineDash([12, 10]);
+    ctx.beginPath(); ctx.arc(1006, 208, 52, 0, Math.PI * 2);
     ctx.lineWidth = 5; ctx.strokeStyle = PINK; ctx.stroke();
     ctx.restore();
-    squiggle(ctx, 60, 950, 170, BLUE);
-    ctx.font = `900 88px ${DISP}`;
+    squiggle(ctx, 56, 936, 160, BLUE);
+    ctx.font = `900 80px ${DISP}`;
     ctx.fillStyle = VIOLET;
-    ctx.fillText("+", 940, 1000);
+    ctx.textAlign = "center";
+    ctx.fillText("+", 1016, 548);
 
-    /* ── main card ── */
-    hardBox(ctx, 70, 70, SIZE - 140, SIZE - 140, 40, WHITE);
+    /* ── main card (940×940, leaves 70px paper field at the bottom) ── */
+    hardBox(ctx, 70, 70, 940, 940, 40, WHITE);
 
     /* header strip */
-    rrect(ctx, 70, 70, SIZE - 140, 78, 40);
+    rrect(ctx, 70, 70, 940, 76, 38);
     ctx.fillStyle = INK; ctx.fill();
     ctx.fillStyle = LIME;
-    ctx.font = `800 30px ${MONO}`;
+    ctx.font = `800 29px ${MONO}`;
     ctx.textAlign = "left";
-    ctx.fillText("✦ GITHUB WRAPPED", 104, 121);
+    ctx.fillText("✦ GITHUB WRAPPED", 102, 120);
     ctx.textAlign = "right";
     ctx.fillStyle = PAPER;
-    ctx.fillText(String(stats.year) + " ✦", SIZE - 104, 121);
+    ctx.fillText(String(stats.year) + " ✦", 978, 120);
     ctx.textAlign = "center";
 
-    /* giant year */
-    ctx.font = `900 128px ${DISP}`;
+    /* giant year (pink with a sun drop) */
+    ctx.font = `900 112px ${DISP}`;
     ctx.fillStyle = SUN;
-    ctx.fillText(String(stats.year), SIZE / 2 + 8, 296);
+    ctx.fillText(String(stats.year), SIZE / 2 + 9, 281);
     ctx.fillStyle = PINK;
-    ctx.fillText(String(stats.year), SIZE / 2, 288);
+    ctx.fillText(String(stats.year), SIZE / 2, 272);
 
     /* ── avatar + handle ── */
     const img = await loadAvatar(profile.avatar_url);
-    const avY = img ? 400 : 360;
+    const avY = 368, avR = 64;
     if (img) {
       ctx.save();
-      ctx.beginPath(); ctx.arc(SIZE / 2, avY, 74, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
-      ctx.fillStyle = "#eee"; ctx.fillRect(SIZE / 2 - 74, avY - 74, 148, 148);
-      ctx.drawImage(img, SIZE / 2 - 74, avY - 74, 148, 148);
+      ctx.beginPath(); ctx.arc(SIZE / 2, avY, avR, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
+      ctx.fillStyle = "#eee"; ctx.fillRect(SIZE / 2 - avR, avY - avR, avR * 2, avR * 2);
+      ctx.drawImage(img, SIZE / 2 - avR, avY - avR, avR * 2, avR * 2);
       ctx.restore();
-      ctx.beginPath(); ctx.arc(SIZE / 2, avY, 74, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(SIZE / 2, avY, avR, 0, Math.PI * 2);
       ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke();
     }
     ctx.fillStyle = INK;
-    ctx.font = `800 42px ${MONO}`;
-    ctx.fillText("@" + profile.login, SIZE / 2, avY + (img ? 130 : 26));
+    ctx.font = `800 34px ${MONO}`;
+    ctx.fillText("@" + profile.login, SIZE / 2, avY + avR + 54);
 
-    /* ── headline number ── */
-    const numY = avY + (img ? 222 : 110);
-    ctx.font = `900 138px ${DISP}`;
-    ctx.fillStyle = INK;
-    ctx.fillText(f(stats.total), SIZE / 2, numY);
-    ctx.font = `800 26px ${MONO}`;
+    /* ── headline number (top edge stays clear of the handle) ── */
+    ctx.font = `900 104px ${DISP}`;
+    ctx.fillText(f(stats.total), SIZE / 2, 606);
+    ctx.font = `800 24px ${MONO}`;
     ctx.fillStyle = "rgba(23,18,11,0.72)";
-    ctx.fillText("· " + I18N.t("pContrib", { year: stats.year }) + " ·", SIZE / 2, numY + 46);
+    ctx.fillText("· " + I18N.t("pContrib", { year: stats.year }) + " ·", SIZE / 2, 650);
 
-    /* ── 4 stat boxes ── */
+    /* ── 4 stat boxes — 2×2, fully inside the card ── */
     const boxes = [
       [f(stats.prs), I18N.t("pPRs")],
       [stats.heat ? stats.heat.longest + "d" : "—", I18N.t("pStreak")],
       [stats.heat ? stats.heat.weekendPct + "%" : "—", I18N.t("pWeekend")],
       [String(stats.langList.length || 0), I18N.t("pLangs")],
     ];
-    const bw = 372, bh = 128, gap = 32;
-    const x0 = (SIZE - (bw * 2 + gap)) / 2;
-    const y0 = numY + 90;
+    const bw = 380, bh = 102, gap = 26;
+    const x0 = (SIZE - (bw * 2 + gap)) / 2; /* =147 */
     boxes.forEach((b, i) => {
       const bx = x0 + (i % 2) * (bw + gap);
-      const by = y0 + Math.floor(i / 2) * (bh + gap);
-      hardBox(ctx, bx, by, bw, bh, 22, WHITE, 3.5);
+      const by = drowY(i);  /* helper below keeps the math honest */
+      hardBox(ctx, bx, by, bw, bh, 20, WHITE, 3.5);
       ctx.fillStyle = INK;
-      ctx.font = `900 54px ${DISP}`;
-      ctx.fillText(b[0], bx + bw / 2, by + 60);
-      ctx.font = `800 22px ${MONO}`;
+      ctx.font = `900 44px ${DISP}`;
+      ctx.fillText(b[0], bx + bw / 2, by + 54);
+      ctx.font = `800 19px ${MONO}`;
       ctx.fillStyle = "rgba(23,18,11,0.62)";
-      ctx.fillText(b[1].toUpperCase(), bx + bw / 2, by + 100);
+      ctx.fillText(b[1].toUpperCase(), bx + bw / 2, by + 84);
     });
+    function drowY(i) { return 678 + Math.floor(i / 2) * (bh + gap); } /* 678 / 806 */
 
     /* ── archetype ticket ── */
     const accent = ARCH_ACCENT[stats.arch.id] || LIME;
-    const ay = y0 + bh * 2 + gap + 40;
-    hardBox(ctx, SIZE / 2 - 380, ay, 760, 112, 20, accent);
+    const ay = 928;
+    rrect(ctx, SIZE / 2 - 300 + 8, ay + 8, 600, 72, 18);
+    ctx.fillStyle = INK; ctx.fill();
+    rrect(ctx, SIZE / 2 - 300, ay, 600, 72, 18);
+    ctx.fillStyle = accent; ctx.fill();
+    ctx.lineWidth = 3.5; ctx.strokeStyle = INK; ctx.stroke();
     ctx.save();
-    rrect(ctx, SIZE / 2 - 366, ay + 12, 732, 88, 14);
-    ctx.setLineDash([10, 8]); ctx.lineWidth = 2.5; ctx.strokeStyle = "rgba(23,18,11,0.55)"; ctx.stroke();
+    rrect(ctx, SIZE / 2 - 288, ay + 9, 576, 54, 12);
+    ctx.setLineDash([9, 7]); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(23,18,11,0.5)"; ctx.stroke();
     ctx.restore();
     ctx.fillStyle = INK;
-    ctx.font = `900 44px ${DISP}`;
-    ctx.fillText(stats.arch.emoji + " " + archText.title.toUpperCase(), SIZE / 2, ay + 52);
-    ctx.font = `800 22px ${MONO}`;
-    ctx.fillStyle = "rgba(23,18,11,0.7)";
-    ctx.fillText(I18N.t("rare", { year: stats.year }), SIZE / 2, ay + 88);
+    ctx.font = `900 30px ${DISP}`;
+    ctx.fillText(stats.arch.emoji + "  " + archText.title.toUpperCase(), SIZE / 2, ay + 48);
 
-    /* ── footer strip (the viral loop) ── */
+    /* ── footer strip in the paper field (the viral loop) ── */
     ctx.fillStyle = INK;
-    ctx.fillRect(70, SIZE - 158, SIZE - 140, 100);
+    ctx.fillRect(70, 1022, 940, 46);
     ctx.fillStyle = LIME;
-    ctx.font = `800 27px ${MONO}`;
-    ctx.fillText(I18N.t("pFooter1"), SIZE / 2, SIZE - 120);
-    ctx.fillStyle = "rgba(246,241,231,0.6)";
-    ctx.font = `700 21px ${MONO}`;
-    ctx.fillText(I18N.t("pFooter2"), SIZE / 2, SIZE - 84);
+    ctx.font = `800 25px ${MONO}`;
+    ctx.fillText(I18N.t("pFooter1"), SIZE / 2, 1053);
 
     /* frame the paper sheet */
     ctx.strokeStyle = INK; ctx.lineWidth = 3;

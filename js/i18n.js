@@ -64,6 +64,7 @@ const I18N = (() => {
       btnDownload: "⬇ Download poster",
       btnAgain: "↻ make yours",
       shared: "✓ copied",
+      hintAttach: "poster downloaded — attach it to your post ✨",
 
       /* rhythm labels */
       rEarly: "early bird", rDay: "daytime coder", rEvening: "evening hacker", rNight: "night owl",

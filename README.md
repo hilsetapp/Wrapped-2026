@@ -35,7 +35,7 @@ Spotify Wrapped — but for your GitHub. Type any username and get an **animated
 
 ## 🚀 Try it in 10 seconds
 
-> **https://hilsetapp.github.io/wrapped-2026/**
+> **https://hilsetapp.github.io/Wrapped-2026/**
 
 1. Open the link.
 2. Type any GitHub username — yours, a friend's, `torvalds`…

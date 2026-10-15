@@ -81,3 +81,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - 🖼 OG/README banner is now **drawn programmatically** (`assets/og-banner.py`,
   PIL) in the zine identity — guaranteed margins, crisp vectors, nothing clipped
   at the edges (the AI-generated one glued text to the left border).
+
+## [0.2.4] - 2026-10-15
+
+### Changed
+- Cache lifetime raised from 15 minutes to 12 hours: a year of stats barely moves, and repeat visits stop burning the GitHub limit.
+- Hit the rate limit? The error now shows the exact time it refills (GitHub sends that in a response header).
+
+### Added
+- Optional personal token field, collapsed under the input. Lifts the limit from 60 to 5000 requests/hour. Lives in this browser only; a rejected token is dropped automatically.
+
+### Fixed
+- The contribution-grid request asked for a 30-second timeout but the argument was ignored and it always cut off at 15 seconds. Honored now.

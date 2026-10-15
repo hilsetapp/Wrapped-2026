@@ -8,17 +8,29 @@
 const GH = (() => {
   const YEAR = 2026;
   const CACHE_PREFIX = "wrapped2026:";
-  const CACHE_TTL = 15 * 60 * 1000; // 15 min
+  /* a year of stats barely moves, so cache long - repeat visits stop eating
+     the anonymous GitHub limit (60 requests/hour per visitor) */
+  const CACHE_TTL = 12 * 60 * 60 * 1000; // 12 h
+
+  /* optional personal token: raises the limit from 60 to 5000 requests/hour */
+  const TOKEN_KEY = CACHE_PREFIX + "token";
+  const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (_) { return ""; } };
+  const setToken = (t) => {
+    try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (_) {}
+  };
 
   /* ---------- tiny fetch helper with typed errors ---------- */
   const TIMEOUT_MS = 15000;
 
-  async function getJSON(url) {
+  async function getJSON(url, timeoutMs = TIMEOUT_MS) {
     const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+    const timer = setTimeout(() => ctl.abort(), timeoutMs);
+    const headers = {};
+    const token = getToken();
+    if (token) headers.Authorization = "Bearer " + token;
     let res;
     try {
-      res = await fetch(url, { signal: ctl.signal });
+      res = await fetch(url, { signal: ctl.signal, headers });
     } catch (e) {
       const err = new Error(
         e.name === "AbortError"
@@ -35,9 +47,17 @@ const GH = (() => {
       e.code = 404;
       throw e;
     }
+    if (res.status === 401) {
+      setToken(""); /* the token is dead - drop it, next run goes anonymous */
+      const e = new Error("token rejected");
+      e.code = 401;
+      throw e;
+    }
     if (res.status === 403) {
-      const e = new Error("rate-limited — GitHub allows 60 unauthenticated requests/hour. Try again in a bit.");
+      const e = new Error("rate-limited");
       e.code = 403;
+      const reset = res.headers.get("x-ratelimit-reset");
+      if (reset) e.reset = new Date(Number(reset) * 1000);
       throw e;
     }
     if (!res.ok) {
@@ -123,5 +143,5 @@ const GH = (() => {
     return data;
   }
 
-  return { fetchWrapped, YEAR };
+  return { fetchWrapped, YEAR, getToken, setToken };
 })();

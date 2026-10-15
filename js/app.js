@@ -90,7 +90,10 @@
     } catch (e) {
       hideLoading();
       if (e.code === 404) showError(I18N.t("error404", { u: username }));
-      else if (e.code === 403) showError(I18N.t("error403"));
+      else if (e.code === 403) showError(e.reset
+        ? I18N.t("error403at", { t: e.reset.toLocaleTimeString(I18N.getLang() === "ru" ? "ru-RU" : "en-US", { hour: "2-digit", minute: "2-digit" }) })
+        : I18N.t("error403"));
+      else if (e.code === 401) showError(I18N.t("error401"));
       else if (e.code === "timeout") showError(I18N.t("errorTimeout"));
       else if (e.code === "network") showError(I18N.t("errorNetwork"));
       else showError(I18N.t("errorGeneric"));
@@ -426,6 +429,13 @@
       start(chip.dataset.demo);
     })
   );
+
+  /* optional personal token: prefilled from the browser, saved on change */
+  const tokenInput = $("#gh-token");
+  if (tokenInput) {
+    tokenInput.value = GH.getToken();
+    tokenInput.addEventListener("change", () => GH.setToken(tokenInput.value.trim()));
+  }
 
   $("#tap-right").addEventListener("click", () => show(idx + 1));
   $("#tap-left").addEventListener("click", () => show(idx - 1));

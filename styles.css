@@ -168,6 +168,21 @@ body::before {
   padding: 12px 16px; max-width: 460px;
 }
 
+/* optional personal token - collapsed by default */
+.adv { width: min(360px, 88vw); margin-top: 20px; font: 600 12.5px var(--mono); }
+.adv summary { cursor: pointer; opacity: .75; list-style: none; text-decoration: underline dashed; text-underline-offset: 3px; }
+.adv summary::-webkit-details-marker { display: none; }
+.adv summary::before { content: "🔑 "; }
+.adv[open] summary { opacity: 1; }
+.adv-hint { margin: 10px 0 8px; font-size: 11.5px; line-height: 1.6; opacity: .8; }
+.adv input {
+  width: 100%; padding: 10px 12px;
+  font: 600 13px var(--mono); color: var(--ink); background: #fff;
+  border: 2px solid var(--ink); border-radius: 8px;
+  box-shadow: var(--shadow-sm); outline: none;
+}
+.adv input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+
 .foot { margin-top: 40px; font: 600 12.5px var(--mono); opacity: .85; line-height: 1.9; }
 .foot-link { color: var(--ink); background: var(--violet); padding: 2px 8px; border: 2px solid var(--ink); border-radius: 4px; text-decoration: none; font-weight: 800; }
 

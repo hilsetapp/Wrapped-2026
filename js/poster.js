@@ -189,14 +189,24 @@ const Poster = (() => {
   }
 
   function download(canvas, username) {
-    canvas.toBlob((blobObj) => {
-      if (!blobObj) return;
+    const name = "github-wrapped-2026-" + username + ".png";
+    const save = (href, revoke) => {
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blobObj);
-      a.download = "github-wrapped-2026-" + username + ".png";
+      a.href = href; a.download = name; a.rel = "noopener";
+      document.body.appendChild(a); /* some mobile browsers ignore clicks on detached links */
       a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    }, "image/png");
+      a.remove();
+      if (revoke) setTimeout(() => URL.revokeObjectURL(href), 8000);
+    };
+    return new Promise((resolve) => {
+      const viaDataURL = () => {
+        try { save(canvas.toDataURL("image/png"), false); resolve(true); }
+        catch (_) { resolve(false); }
+      };
+      if (canvas.toBlob) {
+        canvas.toBlob((b) => { if (b) { save(URL.createObjectURL(b), true); resolve(true); } else viaDataURL(); }, "image/png");
+      } else viaDataURL();
+    });
   }
 
   return { draw, download, SIZE };

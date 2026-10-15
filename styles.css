@@ -444,6 +444,9 @@ body::before {
   background: #fff;
 }
 .finale-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; width: min(300px, 84%); }
+/* the invisible tap zones for story navigation must not steal clicks
+   from the finale buttons — the controls sit above them */
+.finale-actions > * { position: relative; z-index: 6; }
 .finale-actions .btn-primary { font-size: 15px; padding: 14px; }
 .btn-ghost {
   padding: 12px; font: 800 13px var(--mono); text-transform: uppercase;

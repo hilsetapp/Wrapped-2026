@@ -277,6 +277,7 @@
       <canvas id="poster-canvas" width="1080" height="1080"></canvas>
       <div class="finale-actions">
         <button class="btn-primary" id="btn-download">${I18N.t("btnDownload")}</button>
+        <p class="share-hint" id="dl-hint" hidden>${I18N.t("savedHint")}</p>
         <div class="share-row">
           <button class="btn-ghost" id="btn-x">𝕏</button>
           <button class="btn-ghost" id="btn-tg">✈️ Telegram</button>
@@ -371,7 +372,10 @@
     const canvas = el.querySelector("#poster-canvas");
     await Poster.draw(canvas, stats, raw.profile);
 
-    el.querySelector("#btn-download").onclick = () => Poster.download(canvas, raw.profile.login);
+    el.querySelector("#btn-download").onclick = async () => {
+      const saved = await Poster.download(canvas, raw.profile.login);
+      el.querySelector("#dl-hint").hidden = !saved;
+    };
 
     const archText = I18N.arch(stats.arch.id, archVars());
     const shareText = I18N.t("share", {

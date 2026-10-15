@@ -93,3 +93,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 - The contribution-grid request asked for a 30-second timeout but the argument was ignored and it always cut off at 15 seconds. Honored now.
+
+## [0.2.5] - 2026-10-15
+
+### Fixed
+- **Download button on phones**: the invisible left/right tap zones used for story navigation were sitting on top of the finale buttons, so taps near their edges were eaten by slide navigation (looked like "the button does nothing", or it jumped a slide back). The finale controls now sit above the tap zones. Same fix covers the share buttons and "make yours".
+- The save link is now attached to the page before clicking — some mobile browsers ignore programmatic clicks on links that are not in the DOM — and falls back to a data URL if blob saving fails.
+
+### Added
+- A small "saved to Downloads" hint under the download button, so it's visible that the tap registered.

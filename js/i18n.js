@@ -69,6 +69,7 @@ const I18N = (() => {
       btnDownload: "⬇ Download poster",
       btnAgain: "↻ make yours",
       shared: "✓ copied",
+      savedHint: "Poster saved to Downloads ✨ Don't see it? Check the browser's download list.",
       hintAttach: "poster downloaded — attach it to your post ✨",
 
       /* rhythm labels */
@@ -147,6 +148,7 @@ const I18N = (() => {
       btnDownload: "⬇ Скачать постер",
       btnAgain: "↻ сделать своё",
       shared: "✓ скопировано",
+      savedHint: "Постер ушёл в Загрузки ✨ Не видно? Глянь список загрузок браузера.",
       hintAttach: "постер скачан — прикрепи его к посту ✨",
 
       rEarly: "жаворонок", rDay: "дневной кодер", rEvening: "вечерний хакер", rNight: "сова",

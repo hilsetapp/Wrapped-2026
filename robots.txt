@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hilsetapp.github.io/Wrapped-2026/sitemap.xml

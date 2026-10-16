@@ -4,7 +4,7 @@
 
 (() => {
   const $ = (sel) => document.querySelector(sel);
-  const SITE_URL = "https://hilsetapp.github.io/wrapped-2026/";
+  const SITE_URL = "https://hilsetapp.github.io/Wrapped-2026/";
   const SLIDE_MS = 6500;
   const ACCENTS = ["lime", "sun", "pink", "blue", "violet", "red"];
 

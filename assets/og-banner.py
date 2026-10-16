@@ -118,7 +118,7 @@ im.paste(card, (720, 60), card)
 
 # ── bottom ticker strip ──
 d.rectangle((0, H-52, W, H), fill=INK)
-d.text((W//2, H-27), "hilsetapp.github.io/wrapped-2026  ✦  no login  ✦  open source", font=font(FM, 24), fill=WHITE, anchor="mm")
+d.text((W//2, H-27), "hilsetapp.github.io/Wrapped-2026  ✦  no login  ✦  open source", font=font(FM, 24), fill=WHITE, anchor="mm")
 
 # ── outer frame ──
 d.rectangle((6, 6, W-6, H-6), outline=INK, width=4)

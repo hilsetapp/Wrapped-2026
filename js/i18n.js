@@ -84,7 +84,7 @@ const I18N = (() => {
       gridNA: "grid unavailable right now",
       pRepos: "repos",
       pPRs: "pull requests", pStreak: "longest streak", pWeekend: "on weekends", pLangs: "languages",
-      pFooter1: "make yours → hilsetapp.github.io/wrapped-2026",
+      pFooter1: "make yours → hilsetapp.github.io/Wrapped-2026",
       pFooter2: "no login · 100% browser · open source",
 
       /* archetypes */
@@ -165,7 +165,7 @@ const I18N = (() => {
       gridNA: "графа сейчас недоступна",
       pRepos: "репо",
       pPRs: "пул-реквестов", pStreak: "серия дней", pWeekend: "в выходные", pLangs: "языков",
-      pFooter1: "сделай свою → hilsetapp.github.io/wrapped-2026",
+      pFooter1: "сделай свою → hilsetapp.github.io/Wrapped-2026",
       pFooter2: "без логина · всё в браузере · open source",
 
       a_community_star: ["Звезда комьюнити", "Люди реально пользуются твоим кодом: {stars} звёзд — это громко."],

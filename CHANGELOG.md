@@ -102,3 +102,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 - A small "saved to Downloads" hint under the download button, so it's visible that the tap registered.
+
+## [0.2.6] - 2026-10-16
+
+### Changed
+- The poster is now **vertical 1080×1350 (4:5)** instead of a 1080×1080 square: on phones it no longer reads as a squashed tile, and it sits right in feeds and stories.
+- The poster got a lot more to look at: the **contribution grid** (52×7 miniature), **top languages** as bars, a rotated **rhythm sticker** ("night owl · 58% after 22:00"), the secondary archetype as a small line on the ticket, and a **QR sticker** that opens the site so anyone can make their own from your post.
+- Finale slide: the preview now matches the 4:5 poster (no more square), sizes itself to fit short screens, and got a few floating doodles so the last screen doesn't feel empty.
+
+### Added
+- If the contribution-grid source doesn't answer, the poster shows an honest "grid unavailable" placeholder instead of a hole; with no rhythm data it falls back to a stars/repos sticker, so the layout never falls apart.
+- Finale controls shrink on very short screens so the buttons stay reachable.
+
+### Added
+- Vendored `qrcode-generator` (MIT, Kazuhiko Arase) under `js/vendor/` with its license in `licenses/` - the site stays dependency-free at runtime.

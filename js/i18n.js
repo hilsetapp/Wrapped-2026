@@ -79,6 +79,10 @@ const I18N = (() => {
 
       /* poster */
       pContrib: "contributions in {year}",
+      pGrid: "the year in squares",
+      pNight: "after 22:00",
+      gridNA: "grid unavailable right now",
+      pRepos: "repos",
       pPRs: "pull requests", pStreak: "longest streak", pWeekend: "on weekends", pLangs: "languages",
       pFooter1: "make yours → hilsetapp.github.io/wrapped-2026",
       pFooter2: "no login · 100% browser · open source",
@@ -156,6 +160,10 @@ const I18N = (() => {
       share: "Мой GitHub Wrapped {year} 🔥 {total} вкладов, архетип: {emoji} {title}. Сделай свой — без логина: {url}",
 
       pContrib: "вкладов в {year}",
+      pGrid: "графа года",
+      pNight: "ночью",
+      gridNA: "графа сейчас недоступна",
+      pRepos: "репо",
       pPRs: "пул-реквестов", pStreak: "серия дней", pWeekend: "в выходные", pLangs: "языков",
       pFooter1: "сделай свою → hilsetapp.github.io/wrapped-2026",
       pFooter2: "без логина · всё в браузере · open source",

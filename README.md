@@ -31,7 +31,8 @@ Spotify Wrapped — but for your GitHub. Type any username and get an **animated
 - 📦 **repos that defined your year** + your AI-era footprint 🤖
 - 🌍 **English & Русский** — one-tap language switch, works even mid-story, poster included
 
-…ending with a **shareable 1080×1080 poster PNG** you can download and post anywhere.
+…ending with a **shareable 1080×1350 poster PNG** (vertical 4:5: the year, your grid,
+top languages, rhythm, archetype and a QR back to the site) you can download and post anywhere.
 
 ## 🚀 Try it in 10 seconds
 
@@ -83,7 +84,8 @@ wrapped-2026/
 │   ├── i18n.js         # EN/RU strings for landing, story and poster
 │   ├── github.js       # the data layer (fetch + localStorage cache)
 │   ├── stats.js        # turns raw data into streaks, languages, archetypes
-│   ├── poster.js       # draws the 1080×1080 PNG on canvas
+│   ├── poster.js       # draws the 1080×1350 PNG on canvas
+│   ├── vendor/         # vendored qrcode-generator (MIT) for the poster QR
 │   └── app.js          # story engine: slides, autoplay, tap zones, share
 └── assets/             # logo & og-banner
 ```

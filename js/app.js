@@ -274,7 +274,10 @@
     /* — 8: finale — */
     slideFns.push(() => ({ accent: acc("lime"), html: `
       <p class="kicker">${I18N.t("kFinale")}</p>
-      <canvas id="poster-canvas" width="1080" height="1080"></canvas>
+      <div class="fsticker fst-a" aria-hidden="true">✦</div>
+      <div class="fsticker fst-b" aria-hidden="true">★</div>
+      <div class="fsticker fst-c" aria-hidden="true">🌙</div>
+      <canvas id="poster-canvas" width="1080" height="1350"></canvas>
       <div class="finale-actions">
         <button class="btn-primary" id="btn-download">${I18N.t("btnDownload")}</button>
         <p class="share-hint" id="dl-hint" hidden>${I18N.t("savedHint")}</p>

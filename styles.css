@@ -435,8 +435,9 @@ body::before {
 
 /* finale */
 #poster-canvas {
-  width: min(280px, 72%);
-  aspect-ratio: 1 / 1;
+  /* vertical 4:5 poster — never stretched, height follows the aspect ratio */
+  width: min(74%, 336px, 42vh);
+  aspect-ratio: 4 / 5;
   height: auto;
   flex-shrink: 0; /* otherwise flexbox squashes it vertically on short frames */
   border: 3px solid var(--ink); border-radius: 14px;
@@ -448,6 +449,28 @@ body::before {
    from the finale buttons — the controls sit above them */
 .finale-actions > * { position: relative; z-index: 6; }
 .finale-actions .btn-primary { font-size: 15px; padding: 14px; }
+
+/* short screens: pull the poster down a bit so the buttons stay reachable */
+@media (max-height: 720px) {
+  #poster-canvas { width: min(66%, 296px, 35vh); }
+  .finale-actions { margin-top: 12px; gap: 9px; }
+  .finale-actions .btn-primary { padding: 11px; }
+  .btn-ghost { padding: 9px; }
+}
+
+/* floating doodles around the finale so the slide doesn't feel empty */
+.fsticker {
+  position: absolute; font-size: 30px; line-height: 1;
+  pointer-events: none; opacity: .9;
+  animation: fst-bob 3.4s ease-in-out infinite;
+}
+.fst-a { top: 14%; left: 9%; color: var(--sun); transform: rotate(-14deg); animation-delay: .2s; }
+.fst-b { top: 22%; right: 11%; color: var(--pink); transform: rotate(12deg); animation-delay: 1.1s; }
+.fst-c { bottom: 15%; left: 12%; transform: rotate(-8deg); animation-delay: 1.9s; }
+@keyframes fst-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
 .btn-ghost {
   padding: 12px; font: 800 13px var(--mono); text-transform: uppercase;
   background: #fff; color: var(--ink);
